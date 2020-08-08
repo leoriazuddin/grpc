@@ -1,0 +1,6 @@
+//Search these repos for dependencies
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}

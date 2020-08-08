@@ -1,0 +1,60 @@
+plugins {
+    //Required for protobuf
+    id "com.google.protobuf" version "0.8.12"
+    // Apply the java plugin to add support for Java
+    id 'java'
+
+    // Apply the application plugin to add support for building a CLI application.
+    id 'application'
+}
+
+sourceCompatibility = 1.8
+
+//Update these versions as necessary; these are the current versions as of the writing of this article.
+def grpcVersion = '1.29.0';
+def protobufVersion = '3.12.2';
+
+dependencies {
+    //This string interpolation ${} lets us reuse the version variables we defined above
+    implementation "io.grpc:grpc-all:${grpcVersion}"
+    implementation "com.google.protobuf:protobuf-java:${protobufVersion}"
+
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+application {
+    // Define the main class for the application.
+    mainClassName = 'service.MovieServer'
+}
+
+//This holds the configuration for the protocol buffers compilation step
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download the proto compiler from maven central
+        artifact = 'com.google.protobuf:protoc:3.12.3'
+    }
+
+    //In order to get our gRPC service stubs and client/server code, we need to include the gRPC plugin for protobuf
+    plugins {
+        grpc {
+            artifact = "io.grpc:protoc-gen-grpc-java:${grpcVersion}"
+        }
+    }
+
+    //This is needed to apply the gRPC plugin to protoc
+    generateProtoTasks {
+        all()*.plugins {
+            grpc {}
+        }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
